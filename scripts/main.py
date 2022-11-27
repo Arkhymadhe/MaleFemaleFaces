@@ -3,8 +3,6 @@
 import argparse
 from copy import deepcopy
 
-from torchinfo import summary
-
 from data_ops import *
 from utils import *
 from viz_utils import *
@@ -139,7 +137,7 @@ def main():
         torch.save(
             {
                 'model_state_dict': generator.state_dict(),
-                'opt_state_dict': opt_g.state_dict()
+                'opt_state_dict': opt_d.state_dict()
             },
             "saved_discriminator.ckpt"
         )
