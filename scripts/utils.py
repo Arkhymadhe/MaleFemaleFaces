@@ -147,19 +147,4 @@ def train_step(opt_d, opt_g, criterion, discriminator, generator,
 
     return history, discriminator, generator, opt_d, opt_g
 
-
-def visualize_losses(history: dict[str, dict[str, str]], epochs: int):
-    g_losses = [history[f"Epoch {e + 1}"]['G-Loss'] for e in range(epochs)]
-    d_losses = [history[f"Epoch {e + 1}"]['D-Loss'] for e in range(epochs)]
-
-    plt.figure(figsize=(10, 10))
-    plt.plot(range(epochs), d_losses, label="Discriminator loss over epoch")
-    plt.plot(range(epochs), g_losses, label="Generator loss over epoch")
-
-    plt.show()
-
-    plt.close('all')
-    return
-
-
 def keep_time(start_time: float): return time.time() - start_time

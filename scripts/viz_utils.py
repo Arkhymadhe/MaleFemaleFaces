@@ -28,9 +28,9 @@ def generate_images(model, device: torch.device, epoch: int, num_samples: int = 
     model.eval()
 
     inputs = torch.randn(size=[num_samples, *latent_dims], device=device)
-    images = (model(inputs).detach().cpu().permute(0, 2, 3, 1).numpy() + 1) / 2
+    images = model(inputs).detach().cpu().permute(0, 2, 3, 1)
 
-    display_images(denorm(images), nrows, ncolumns, figsize, folder, epoch, save_images)
+    display_images(denorm(images.numpy()), nrows, ncolumns, figsize, folder, epoch, save_images)
 
     return
 
@@ -49,5 +49,18 @@ def display_images(images: Tensor, nrows: int = 4, ncolumns: int = 4, figsize: T
         plt.savefig(f'{folder}/Generated Images at Epoch {epoch:04d}.png', dpi=300)
 
     plt.show()
+    plt.close('all')
+    return
+
+def visualize_losses(history: dict[str, dict[str, str]], epochs: int):
+    g_losses = [history[f"Epoch {e + 1}"]['G-Loss'] for e in range(epochs)]
+    d_losses = [history[f"Epoch {e + 1}"]['D-Loss'] for e in range(epochs)]
+
+    plt.figure(figsize=(10, 10))
+    plt.plot(range(epochs), d_losses, label="Discriminator loss over epoch")
+    plt.plot(range(epochs), g_losses, label="Generator loss over epoch")
+
+    plt.show()
+
     plt.close('all')
     return

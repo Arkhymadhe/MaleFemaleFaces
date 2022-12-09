@@ -2,3 +2,4 @@
 play.py
 /.idea/*
 !/.idea/workspace.xml
+scripts/__pycache__/*
