@@ -36,19 +36,19 @@ The results from training may be viewed below:
 
 Epoch 1:
 
-![Image](Generated images/Generated Images at Epoch 0001.png)
+![Image](https://github.com/Arkhymadhe/MaleFemaleFaces/blob/92bf53f3d3af5a70b2bd14ebb4dee399b846b397/Generated%20images/Generated%20Images%20at%20Epoch%200001.png)
 ---
 Epoch 10:
 
-![Image](Generated images/Generated Images at Epoch 0010.png)
+![Image](https://github.com/Arkhymadhe/MaleFemaleFaces/blob/92bf53f3d3af5a70b2bd14ebb4dee399b846b397/Generated%20images/Generated%20Images%20at%20Epoch%200010.png)
 ---
 Epoch 20:
 
-![Image](Generated images/Generated Images at Epoch 0020.png)
+![Image](https://github.com/Arkhymadhe/MaleFemaleFaces/blob/92bf53f3d3af5a70b2bd14ebb4dee399b846b397/Generated%20images/Generated%20Images%20at%20Epoch%200020.png)
 ---
 Epoch 30:
 
-![Image](Generated images/Generated Images at Epoch 0030.png)
+![Image](https://github.com/Arkhymadhe/MaleFemaleFaces/blob/92bf53f3d3af5a70b2bd14ebb4dee399b846b397/Generated%20images/Generated%20Images%20at%20Epoch%200030.png)
 ---
 ## To-Dos
 
