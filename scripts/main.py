@@ -91,7 +91,6 @@ def main():
     print('>>> Random seeds set!')
     print(f'>>> Reproducibility ensured! Time elapsed : {keep_time(start_time):.5f} secs.\n')
 
-    ### Feature generation
     print('>>> Construct model architectures...')
     start_time = time.time()
 
