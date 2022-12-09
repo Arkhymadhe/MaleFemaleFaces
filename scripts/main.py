@@ -17,7 +17,7 @@ import gc
 
 try:
     from jupyterthemes import jtplot
-except:
+except ModuleNotFoundError:
     pass
 
 
@@ -50,6 +50,8 @@ def main():
 
     args.add_argument('--decay_rate', type=float, default=0.001, help='Weight decay factor')
 
+    args.add_argument('--figsize', type=tuple[int, int], default=(5, 5), help='Generated image figure size')
+
     args.add_argument('--style', type=str, default='gruvboxd',
                       choices=['gruvboxd', 'onedork', 'oceans16', 'solarizedd'],
                       help='Visualization style')
@@ -60,7 +62,7 @@ def main():
 
     try:
         jtplot.style(args.style)
-    except:
+    except NameError:
         pass
 
     start_time = time.time()
@@ -84,7 +86,7 @@ def main():
     b = next(iter(data))
 
     ### Display selected sample
-    display_images(images=denorm(b.permute(0, 2, 3, 1)), nrows=4, ncolumns=4, figsize=(10, 10))
+    display_images(images=denorm(b.permute(0, 2, 3, 1)), nrows=4, ncolumns=4, figsize=args.figsize)
 
     ### Reproducibility
     print('>>> Ensuring reproducibility...')
@@ -123,7 +125,7 @@ def main():
     history, discriminator, generator, opt_d, opt_g = train_loop(
         data, args.epochs, folder=args.image_dir,
         lr=args.lr, betas=(args.beta1, args.beta2), decay_rate=args.decay_rate,
-        criterion=nn.BCELoss(), device=device, history=history)
+        criterion=nn.BCELoss(), device=device, figsize=args.figsize, history=history)
 
     ### Final history of metrics
     visualize_losses(history, epochs=args.epochs)

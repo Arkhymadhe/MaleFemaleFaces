@@ -40,8 +40,8 @@ def load_model(device: torch.device, constructor: nn.Module):
 
 
 def train_loop(train_dl: DataLoader, epochs: int,
-               lr: float, betas: tuple[float, float], decay_rate: float,
-               criterion, device: torch.device, folder: str, history: dict):
+               lr: float, betas: tuple[float, float], figsize: tuple[int, int],
+               decay_rate: float, criterion, device: torch.device, folder: str, history: dict):
     history = dict()
     dl_length = len(train_dl)
     noisy_labels = bool(np.random.choice([0, 1]))
@@ -105,7 +105,7 @@ def train_loop(train_dl: DataLoader, epochs: int,
         # step_g.step()
 
         ### Generate test samples via the generator
-        generate_images(model=generator, device=device, folder = folder, num_samples=16, save_images=True, epoch=epoch + 1)
+        generate_images(model=generator, device=device, folder = folder, figsize = figsize, num_samples=16, save_images=True, epoch=epoch + 1)
 
     return history, discriminator, generator, opt_d, opt_g
 
