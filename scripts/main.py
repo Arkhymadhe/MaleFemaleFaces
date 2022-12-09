@@ -3,7 +3,7 @@
 import argparse
 from copy import deepcopy
 
-from torchinfo import summary
+#from torchinfo import summary
 
 from data_ops import *
 from utils import *
@@ -14,6 +14,7 @@ from models import *
 import random
 import numpy as np
 import gc
+import shutil
 
 try:
     from jupyterthemes import jtplot
@@ -33,7 +34,7 @@ def main():
 
     args.add_argument('--image_size', type=int, default=64, help='Input image shape')
 
-    args.add_argument('--batch_size', type=int, default=32, help='Batch size')
+    args.add_argument('--batch_size', type=int, default=64, help='Batch size')
 
     args.add_argument('--stats', type=tuple, default=((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
                       help='Image normalization statistics')
@@ -46,7 +47,7 @@ def main():
 
     args.add_argument('--beta2', type=float, default=0.999, help='Second moment')
 
-    args.add_argument('--epochs', type=int, default=100, help='Number of GAN training cycles')
+    args.add_argument('--epochs', type=int, default=30, help='Number of GAN training cycles')
 
     args.add_argument('--decay_rate', type=float, default=0.001, help='Weight decay factor')
 
@@ -134,26 +135,35 @@ def main():
         if not os.path.exists(os.getcwd().replace('scripts', 'artefacts')):
             os.makedirs(os.getcwd().replace('scripts', 'artefacts'))
 
+        gen_name = "saved_generator.ckpt"
+        dis_name = "saved_discriminator.ckpt"
+
         print('>>> Saving model weights...')
         torch.save(
             {
                 'model_state_dict': generator.state_dict(),
                 'opt_state_dict': opt_g.state_dict()
             },
-            "saved_generator.ckpt"
+            gen_name
         )
 
         torch.save(
             {
-                'model_state_dict': generator.state_dict(),
-                'opt_state_dict': opt_g.state_dict()
+                'model_state_dict': discriminator.state_dict(),
+                'opt_state_dict': opt_d.state_dict()
             },
-            "saved_discriminator.ckpt"
+            dis_name
         )
+
+        ### Move trained artefacts to appropriate directories
+        shutil.move(dis_name,
+                    os.path.join(os.getcwd().replace("scripts", "artefacts"), dis_name))
+        shutil.move(gen_name,
+                    os.path.join(os.getcwd().replace("scripts", "artefacts"), gen_name))
 
         print('>>> Weights saved!\n')
 
-    print(f'>>> Program complete! Total time elapsed: {keep_time(origin_time)}')
+    print(f'>>> Program complete! Total time elapsed: {keep_time(origin_time): .6f} secs')
 
 
 ### Run program
