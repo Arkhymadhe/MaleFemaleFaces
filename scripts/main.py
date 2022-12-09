@@ -28,7 +28,7 @@ def main():
 
     args.add_argument('--image_size', type=int, default=64, help='Input image shape')
 
-    args.add_argument('--batch_size', type=int, default=64, help='Batch size')
+    args.add_argument('--batch_size', type=int, default=32, help='Batch size')
 
     args.add_argument('--stats', type=tuple, default=((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
                       help='Image normalization statistics')
@@ -43,7 +43,7 @@ def main():
 
     args.add_argument('--epochs', type=int, default=100, help='Number of GAN training cycles')
 
-    args.add_argument('--decay_rate', type=float, default=0.05, help='Weight decay factor')
+    args.add_argument('--decay_rate', type=float, default=0.001, help='Weight decay factor')
 
     args.add_argument('--style', type=str, default='gruvboxd',
                       choices=['gruvboxd', 'onedork', 'oceans16', 'solarizedd'],
