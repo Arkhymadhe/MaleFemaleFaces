@@ -13,7 +13,7 @@
 The following steps are to be followed to run this repo:
 1. Run the bash script.
     ```bash
-        $ sh bashScript.sh
+    $ sh bashScript.sh
     ```
    This will download the image dataset and unzip it into the `dataset` directory.
 2. Run the `main.py` script. This takes a number of arguments including:
