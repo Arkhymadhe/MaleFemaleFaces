@@ -1,3 +1,4 @@
 /dataset/*
 play.py
 /.idea/*
+!/.idea/workspace.xml
