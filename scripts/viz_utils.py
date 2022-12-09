@@ -30,7 +30,7 @@ def generate_images(model, device: torch.device, epoch: int, num_samples: int = 
     inputs = torch.randn(size=[num_samples, *latent_dims], device=device)
     images = (model(inputs).detach().cpu().permute(0, 2, 3, 1).numpy() + 1) / 2
 
-    display_images(images, nrows, ncolumns, figsize, folder, epoch, save_images)
+    display_images(denorm(images), nrows, ncolumns, figsize, folder, epoch, save_images)
 
     return
 

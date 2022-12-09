@@ -3,6 +3,8 @@
 import argparse
 from copy import deepcopy
 
+from torchinfo import summary
+
 from data_ops import *
 from utils import *
 from viz_utils import *
@@ -13,7 +15,10 @@ import random
 import numpy as np
 import gc
 
-from jupyterthemes import jtplot
+try:
+    from jupyterthemes import jtplot
+except:
+    pass
 
 
 def main():
@@ -53,7 +58,10 @@ def main():
 
     args = args.parse_args()
 
-    jtplot.style(args.style)
+    try:
+        jtplot.style(args.style)
+    except:
+        pass
 
     start_time = time.time()
     origin_time = deepcopy(start_time)
@@ -136,7 +144,7 @@ def main():
         torch.save(
             {
                 'model_state_dict': generator.state_dict(),
-                'opt_state_dict': opt_d.state_dict()
+                'opt_state_dict': opt_g.state_dict()
             },
             "saved_discriminator.ckpt"
         )
