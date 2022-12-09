@@ -35,15 +35,19 @@ Training began from noise:
 The results from training may be viewed below:
 
 Epoch 1:
+
 ![Image](Generated images/Generated Images at Epoch 0001.png)
 ---
 Epoch 10:
+
 ![Image](Generated images/Generated Images at Epoch 0010.png)
 ---
 Epoch 20:
+
 ![Image](Generated images/Generated Images at Epoch 0020.png)
 ---
 Epoch 30:
+
 ![Image](Generated images/Generated Images at Epoch 0030.png)
 ---
 ## To-Dos
