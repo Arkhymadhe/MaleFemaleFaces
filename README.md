@@ -36,7 +36,7 @@ The results from training may be viewed below:
 
 Epoch 1:
 
-![Image](Generated images/Generated Images at Epoch 0001.png)
+![Image]('Generated images/Generated Images at Epoch 0001.png')
 ---
 Epoch 10:
 
