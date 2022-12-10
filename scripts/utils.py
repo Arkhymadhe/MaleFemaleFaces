@@ -10,7 +10,7 @@ from torch.utils.data import DataLoader
 
 import time
 
-from models import Generator, Discriminator
+from dcgan import Generator, Discriminator
 from viz_utils import generate_images
 
 
@@ -62,6 +62,9 @@ def train_loop(train_dl: DataLoader, epochs: int,
 
     for epoch in range(epochs):
         history[f'Epoch {epoch + 1}'] = {'G-Loss': [], 'D-Loss': []}
+        if epoch == 0:
+            generate_images(model=generator, device=device, folder=folder, figsize=figsize, num_samples=16,
+                            save_images=True, epoch=epoch)
         for ix, data in enumerate(train_dl):
             ### Zero out the accumulated gradients
             opt_d.zero_grad()
