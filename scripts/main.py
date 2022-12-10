@@ -33,7 +33,7 @@ def main():
 
     args.add_argument('--image_size', type=int, default=64, help='Input image shape')
 
-    args.add_argument('--batch_size', type=int, default=64, help='Batch size')
+    args.add_argument('--batch_size', type=int, default=32, help='Batch size')
 
     args.add_argument('--stats', type=tuple, default=((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
                       help='Image normalization statistics')
@@ -44,9 +44,9 @@ def main():
 
     args.add_argument('--beta1', type=float, default=0.5, help='First moment')
 
-    args.add_argument('--beta2', type=float, default=0.999, help='Second moment')
+    args.add_argument('--beta2', type=float, default=0.99, help='Second moment')
 
-    args.add_argument('--epochs', type=int, default=30, help='Number of GAN training cycles')
+    args.add_argument('--epochs', type=int, default=50, help='Number of GAN training cycles')
 
     args.add_argument('--decay_rate', type=float, default=0.001, help='Weight decay factor')
 
@@ -162,7 +162,7 @@ def main():
 
         print('>>> Weights saved!\n')
 
-    print(f'>>> Program complete! Total time elapsed: {keep_time(origin_time): .6f} secs')
+    print(f'>>> Program complete! Total time elapsed: {keep_time(origin_time)/60: .6f} mins')
 
 
 ### Run program

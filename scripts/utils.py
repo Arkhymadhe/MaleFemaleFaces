@@ -147,4 +147,5 @@ def train_step(opt_d, opt_g, criterion, discriminator, generator,
 
     return history, discriminator, generator, opt_d, opt_g
 
+
 def keep_time(start_time: float): return time.time() - start_time
