@@ -8,7 +8,7 @@ from data_ops import *
 from utils import *
 from viz_utils import *
 
-from models import *
+from dcgan import *
 
 import random
 import numpy as np
@@ -29,7 +29,7 @@ def main():
                       default=os.getcwd().replace('scripts', 'dataset'))
 
     args.add_argument('--image_dir', type=str, help='Directory for generated images',
-                      default=os.getcwd().replace('scripts', 'Generated images'))
+                      default=os.getcwd().replace('scripts', 'Generated_images'))
 
     args.add_argument('--image_size', type=int, default=64, help='Input image shape')
 
@@ -110,17 +110,16 @@ def main():
         print(f"Cuda device selected!\n")
     except:
         print(f"No Cuda device detected! Switching to CPU...\n")
-        device = torch.device("cpu")
+        device = torch.device(device)
 
     ### Instantiate GAN object
 
     print(f'>>> Model & optimizer objects instantiated! Time elapsed : {keep_time(start_time):.5f} secs.\n')
 
-    ### Generator summary
-
     del b
     gc.collect()
     history = dict()
+
     ### Train GAN
     history, discriminator, generator, opt_d, opt_g = train_loop(
         data, args.epochs, folder=args.image_dir,

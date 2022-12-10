@@ -13,7 +13,7 @@
 The following steps are to be followed to run this repo:
 1. Run the bash script.
     ```bash
-    $ sh bashScript.sh
+    $ ./bashScript.sh
     ```
    This will download the image dataset and unzip it into the `dataset` directory.
 2. Run the `main.py` script. This takes a number of arguments including:
@@ -29,39 +29,51 @@ The following steps are to be followed to run this repo:
 ---
 ## Results
 
-Training began from noise:
+Training began from noise like this:
 
-... to satisfactory results.
-The results from training may be viewed below:
+![Image](Generated_images/Generated_Images_at_Epoch_0000.png)
+
+... to more satisfactory results.
+
+
+Said results are displayed below:
+
+---
 
 Epoch 1:
 
-![Image](Generated images/Generated Images at Epoch 0001.png)
+![Image](Generated_images/Generated_Images_at_Epoch_0001.png)
 ---
 Epoch 10:
 
-![Image](Generated images/Generated Images at Epoch 0010.png)
+![Image](Generated_images/Generated_Images_at_Epoch_0010.png)
 ---
 Epoch 20:
 
-![Image](Generated images/Generated Images at Epoch 0020.png)
+![Image](Generated_images/Generated_Images_at_Epoch_0020.png)
 ---
 Epoch 30:
 
-![Image](Generated images/Generated Images at Epoch 0030.png)
+![Image](Generated_images/Generated_Images_at_Epoch_0030.png)
 ---
 Epoch 40:
 
-![Image](Generated images/Generated Images at Epoch 0040.png)
+![Image](Generated_images/Generated_Images_at_Epoch_0040.png)
 ---
 Epoch 50:
 
-![Image](Generated images/Generated Images at Epoch 0050.png)
+![Image](Generated_images/Generated_Images_at_Epoch_0050.png)
 ---
+
+All results obtained above were obtained via training with the code snippet below:
+```bash
+cd scripts
+python main.py --epochs 50 --lr 2e-4 --decay_rate .001 --style solarizedd
+```
 ## To-Dos
 
 ---
 There are still a few additions to make to the project. They include:
 1. Implement training via **noisy labels**.
-2. 
+2. Try out other GAN variants.
 
