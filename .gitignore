@@ -1,4 +1,4 @@
-/dataset/*
+dataset/*
 play.py
 /.idea/*
 scripts/__pycache__/*
