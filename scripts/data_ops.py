@@ -13,7 +13,11 @@ class CelebDataset(Dataset):
 
         self.folder = folder
         self.transform = transform
-        self.folders = list(map(lambda x: os.path.join(self.folder, x), ['males', 'females']))
+
+        self.labels = ['males', 'females']
+        self.label_map = dict(zip(self.labels, [0, 1]))
+
+        self.folders = list(map(lambda x: os.path.join(self.folder, x), self.labels))
         self.images = list(map(lambda x: os.path.join(self.folders[0], x), os.listdir(self.folders[0]))) + \
                       list(map(lambda x: os.path.join(self.folders[1], x), os.listdir(self.folders[1])))
 
@@ -24,7 +28,7 @@ class CelebDataset(Dataset):
         image_path = self.images[ix]
         image = Image.open(image_path)
         image = self.transform(image)
-        return image
+        return image, self.label_map[image_path.split("\\")[-2]]
 
 
 def get_dataset(path: str, stats: Tuple[tuple, tuple], size: int):
