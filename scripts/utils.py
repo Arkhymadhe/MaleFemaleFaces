@@ -39,7 +39,7 @@ def load_model(device: torch.device, constructor: nn.Module):
     return model
 
 
-def train_loop(train_dl: DataLoader, epochs: int,
+def train_loop(train_dl: DataLoader, epochs: int, conditional: bool,
                lr: float, betas: tuple[float, float], figsize: tuple[int, int],
                decay_rate: float, criterion, device: torch.device, folder: str, history: dict):
     history = dict()
@@ -63,21 +63,40 @@ def train_loop(train_dl: DataLoader, epochs: int,
     for epoch in range(epochs):
         history[f'Epoch {epoch + 1}'] = {'G-Loss': [], 'D-Loss': []}
 
-        for ix, data in enumerate(train_dl):
+        for ix, (data, labels) in enumerate(train_dl):
             ### Zero out the accumulated gradients
             opt_d.zero_grad()
 
             ### Update the discriminator (real data)
-            real_outputs = discriminator(data.to(device))
-            real_loss = criterion(real_outputs.squeeze(), torch.ones(len(real_outputs)).to(device))
+            if not conditional:
+                real_outputs = discriminator(data.to(device))
+                real_loss = criterion(real_outputs.squeeze(), torch.ones(len(real_outputs)).to(device))
+            else:
+                real_outputs, class_outputs = discriminator(data.to(device), labels.to(device))
+                _real_loss = criterion(real_outputs.squeeze(), torch.ones(len(real_outputs)).to(device))
+                _class_loss = criterion(class_outputs.squeeze(), torch.ones(len(class_outputs)).to(device))
+
+                real_loss = _real_loss + _class_loss
+
             real_loss.backward()
 
             ### Update the discriminator (fake data)
             noise = torch.randn(size=(len(data), 100, 1, 1), device=device)
-            fake_imgs = generator(noise).detach()
 
-            fake_outputs = discriminator(fake_imgs)
-            fake_loss = criterion(fake_outputs.squeeze(), torch.zeros(len(fake_outputs)).to(device))
+            if not conditional:
+                fake_imgs = generator(noise).detach()
+                fake_outputs = discriminator(fake_imgs)
+                fake_loss = criterion(fake_outputs.squeeze(), torch.zeros(len(fake_outputs)).to(device))
+            else:
+                rand_labels = torch.randint(low = 0, high = 2, size=(len(data), 1), device=device)
+                fake_imgs = generator(noise, rand_labels).detach()
+                fake_outputs, class_outputs = discriminator(fake_imgs)
+
+                _fake_loss = criterion(fake_outputs.squeeze(), torch.zeros(len(fake_outputs)).to(device))
+                _class_loss = criterion(class_outputs.squeeze(), torch.zeros(len(class_outputs)).to(device))
+
+                fake_loss = _fake_loss + _class_loss
+
             fake_loss.backward()
 
             opt_d.step()
@@ -86,10 +105,20 @@ def train_loop(train_dl: DataLoader, epochs: int,
             opt_g.zero_grad()
 
             noise = torch.randn(size=(len(data), 100, 1, 1), device=device)
-            generated_images = generator(noise)
+            if not conditional:
+                generated_images = generator(noise)
 
-            dis_pred = discriminator(generated_images)
-            gen_loss = criterion(dis_pred.squeeze(), torch.ones(len(dis_pred)).to(device))
+                dis_pred = discriminator(generated_images)
+                gen_loss = criterion(dis_pred.squeeze(), torch.ones(len(dis_pred)).to(device))
+            else:
+                rand_labels = torch.randint(low=0, high=2, size=(len(data), 1), device=device)
+                generated_images = generator(noise, rand_labels)
+
+                dis_pred, class_pred = discriminator(generated_images)
+                _gen_loss = criterion(dis_pred.squeeze(), torch.ones(len(dis_pred)).to(device))
+                _class_pred = criterion(class_pred.squeeze(), torch.ones(len(class_pred)).to(device))
+
+                gen_loss = _gen_loss + _class_pred
 
             gen_loss.backward()
             opt_g.step()

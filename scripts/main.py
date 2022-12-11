@@ -83,7 +83,7 @@ def main():
     print()
 
     ### Randomly obtain a sample batch of images
-    b = next(iter(data))
+    b = next(iter(data))[0]
 
     ### Display selected sample
     display_images(images=denorm(b.permute(0, 2, 3, 1)), nrows=4, ncolumns=4, figsize=args.figsize)
