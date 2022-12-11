@@ -1,4 +1,5 @@
 import os
+from torch import float32
 from torch.utils.data import Dataset, DataLoader
 
 import torchvision.transforms as T
@@ -35,15 +36,17 @@ def get_dataset(path: str, stats: Tuple[tuple, tuple], size: int):
     dataset = CelebDataset(path, get_transform(stats, size))
     return dataset
 
+def collate_function(batch):
+    return batch[0], batch[1].to(float32)
 
-def get_dataloader(dataset: CelebDataset, batch_size: int):
-    dataloader = DataLoader(dataset, shuffle=True, batch_size=batch_size)
+def get_dataloader(dataset: CelebDataset, batch_size: int, collate_fn:Callable = None):
+    dataloader = DataLoader(dataset, shuffle=True, batch_size=batch_size, collate_fn=collate_fn)
     return dataloader
 
 
-def load_data(path: str, stats: Tuple[tuple, tuple], size: int, batch_size: int):
+def load_data(path: str, stats: Tuple[tuple, tuple], size: int, collate_fn: Callable, batch_size: int):
     data = get_dataset(path, stats, size)
-    return get_dataloader(data, batch_size)
+    return get_dataloader(data, batch_size, collate_fn)
 
 
 def get_transform(stats: Tuple[tuple, tuple] = None, size: int = 64):

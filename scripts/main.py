@@ -8,7 +8,7 @@ from data_ops import *
 from utils import *
 from viz_utils import *
 
-from dcgan import *
+from cgan import *
 
 import random
 import numpy as np
@@ -39,6 +39,8 @@ def main():
                       help='Image normalization statistics')
 
     args.add_argument('--save', default=True, type=bool, help='Save trained model')
+
+    args.add_argument('--conditional', '-c', type=bool, default=True, help='Conditional or not')
 
     args.add_argument('--lr', type=float, default=2e-4, help='Convergence rate')
 
@@ -77,7 +79,10 @@ def main():
     print('>>> Importing dataset...')
     start_time = time.time()
 
-    data = load_data(path=args.data_dir, batch_size=args.batch_size, size=args.image_size, stats=args.stats)
+    data = load_data(
+        path=args.data_dir, batch_size=args.batch_size,
+        size=args.image_size, stats=args.stats, collate_fn=None
+    )
 
     print(f'>>> Dataset successfully imported! Time elapsed : {keep_time(start_time):.5f} secs.\n')
     print()
@@ -121,8 +126,10 @@ def main():
     history = dict()
 
     ### Train GAN
+    print(f'>>> Starting training, labels = {args.conditional}...\n')
+
     history, discriminator, generator, opt_d, opt_g = train_loop(
-        data, args.epochs, folder=args.image_dir,
+        data, args.epochs, folder=args.image_dir, conditional = args.conditional,
         lr=args.lr, betas=(args.beta1, args.beta2), decay_rate=args.decay_rate,
         criterion=nn.BCELoss(), device=device, figsize=args.figsize, history=history)
 

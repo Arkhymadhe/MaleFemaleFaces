@@ -10,7 +10,7 @@ from torch.utils.data import DataLoader
 
 import time
 
-from dcgan import Generator, Discriminator
+from cgan import Generator, Discriminator
 from viz_utils import generate_images
 
 
@@ -72,9 +72,10 @@ def train_loop(train_dl: DataLoader, epochs: int, conditional: bool,
                 real_outputs = discriminator(data.to(device))
                 real_loss = criterion(real_outputs.squeeze(), torch.ones(len(real_outputs)).to(device))
             else:
-                real_outputs, class_outputs = discriminator(data.to(device), labels.to(device))
+                real_outputs, class_outputs = discriminator(data.to(device))
+
                 _real_loss = criterion(real_outputs.squeeze(), torch.ones(len(real_outputs)).to(device))
-                _class_loss = criterion(class_outputs.squeeze(), torch.ones(len(class_outputs)).to(device))
+                _class_loss = criterion(class_outputs.float().squeeze(), labels.to(device, torch.float32))
 
                 real_loss = _real_loss + _class_loss
 
@@ -88,12 +89,12 @@ def train_loop(train_dl: DataLoader, epochs: int, conditional: bool,
                 fake_outputs = discriminator(fake_imgs)
                 fake_loss = criterion(fake_outputs.squeeze(), torch.zeros(len(fake_outputs)).to(device))
             else:
-                rand_labels = torch.randint(low = 0, high = 2, size=(len(data), 1), device=device)
+                rand_labels = torch.randint(low = 0, high = 2, size=(len(data), ), device=device)
                 fake_imgs = generator(noise, rand_labels).detach()
                 fake_outputs, class_outputs = discriminator(fake_imgs)
 
                 _fake_loss = criterion(fake_outputs.squeeze(), torch.zeros(len(fake_outputs)).to(device))
-                _class_loss = criterion(class_outputs.squeeze(), torch.zeros(len(class_outputs)).to(device))
+                _class_loss = criterion(class_outputs.float().squeeze(), rand_labels.to(torch.float32))
 
                 fake_loss = _fake_loss + _class_loss
 
@@ -111,12 +112,12 @@ def train_loop(train_dl: DataLoader, epochs: int, conditional: bool,
                 dis_pred = discriminator(generated_images)
                 gen_loss = criterion(dis_pred.squeeze(), torch.ones(len(dis_pred)).to(device))
             else:
-                rand_labels = torch.randint(low=0, high=2, size=(len(data), 1), device=device)
+                rand_labels = torch.randint(low=0, high=2, size=(len(data), ), device=device)
                 generated_images = generator(noise, rand_labels)
 
                 dis_pred, class_pred = discriminator(generated_images)
                 _gen_loss = criterion(dis_pred.squeeze(), torch.ones(len(dis_pred)).to(device))
-                _class_pred = criterion(class_pred.squeeze(), torch.ones(len(class_pred)).to(device))
+                _class_pred = criterion(class_pred.squeeze(), rand_labels.to(torch.float32))
 
                 gen_loss = _gen_loss + _class_pred
 
@@ -135,7 +136,10 @@ def train_loop(train_dl: DataLoader, epochs: int, conditional: bool,
         # step_g.step()
 
         ### Generate test samples via the generator
-        generate_images(model=generator, device=device, folder = folder, figsize = figsize, num_samples=16, save_images=True, epoch=epoch + 1)
+        generate_images(
+            model=generator, device=device, folder = folder, figsize = figsize,
+            num_samples=16, save_images=True, conditional = conditional, epoch=epoch + 1
+        )
 
     return history, discriminator, generator, opt_d, opt_g
 

@@ -2,7 +2,6 @@ import torch
 from torch import nn
 from dcgan import Discriminator as BaseDiscriminator, Generator as BaseGenerator
 
-from torchinfo import summary
 
 class GeneratorEmbedding(nn.Module):
     def __init__(self, latent_dims: int = 50):
@@ -41,7 +40,6 @@ class Generator(nn.Module):
     def forward(self, x, y):
         pred = self.embedder(y)
         x = torch.cat([x, pred], dim=1)
-        print(x.shape)
         pred = self.base(x)
 
         return pred

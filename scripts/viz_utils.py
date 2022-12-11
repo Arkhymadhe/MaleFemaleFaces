@@ -15,7 +15,7 @@ def denorm(img: Tensor):
 def generate_images(model, device: torch.device, epoch: int, num_samples: int = 16,
                     nrows: int = 4, ncolumns: int = 4, latent_dims: Tuple[int, int, int] = (100, 1, 1),
                     figsize: Tuple[int, int] = (10, 10), folder: str = 'DCGAN_images',
-                    save_images: bool = False):
+                    save_images: bool = False, conditional: bool = False):
     """
     Generates images when called.
 
@@ -29,7 +29,11 @@ def generate_images(model, device: torch.device, epoch: int, num_samples: int = 
     model.eval()
 
     inputs = torch.randn(size=[num_samples, *latent_dims], device=device)
-    images = model(inputs).detach().cpu().permute(0, 2, 3, 1)
+    if not conditional:
+        images = model(inputs).detach().cpu().permute(0, 2, 3, 1)
+    else:
+        rand_labels = torch.randint(low=0, high=2, size=(num_samples,), device=device)
+        images = model(inputs, rand_labels).detach().cpu().permute(0, 2, 3, 1)
 
     display_images(denorm(images).numpy(), nrows, ncolumns, figsize, folder, epoch, save_images)
 
