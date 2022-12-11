@@ -74,6 +74,7 @@ python main.py --epochs 50 --lr 2e-4 --decay_rate .001 --style solarizedd
 
 ---
 There are still a few additions to make to the project. They include:
-1. Implement training via **noisy labels**.
-2. Try out other GAN variants.
+1. Improve documentation.
+2. Implement training via **noisy labels**.
+3. Try out other GAN variants.
 
