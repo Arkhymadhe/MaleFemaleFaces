@@ -19,6 +19,7 @@ The following steps are to be followed to run this repo:
 2. Run the `main.py` script. This takes a number of arguments including:
     ```
     - figsize: image size for generated images (Default: 5 X 5)
+    - conditional: Train conditional GAN or not (Default: True)
     - lr: speed of convergence (Default: 1e-4)
     - data_dir: Dataset directory
     - image_dir: Directory to save generated images
@@ -77,4 +78,6 @@ There are still a few additions to make to the project. They include:
 1. Improve documentation.
 2. Implement training via **noisy labels**.
 3. Try out other GAN variants.
+   1. DCGAN
+   2. CGAN
 
