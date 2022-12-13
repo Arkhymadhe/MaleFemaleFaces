@@ -10,6 +10,7 @@
 ## Implementation
 
 ---
+This is the **test** branch for this repo.
 The following steps are to be followed to run this repo:
 1. Run the bash script.
     ```bash
