@@ -39,7 +39,7 @@ def load_model(device: torch.device, constructor: nn.Module):
     return model
 
 
-def train_loop(train_dl: DataLoader, epochs: int, conditional: bool,
+def train_loop(train_dl: DataLoader, epochs: int, conditional: bool, schedule: bool,
                lr: float, betas: tuple[float, float], figsize: tuple[int, int],
                decay_rate: float, criterion, device: torch.device, folder: str, history: dict):
     history = dict()
@@ -53,6 +53,10 @@ def train_loop(train_dl: DataLoader, epochs: int, conditional: bool,
     opt_g = optim.Adam(generator.parameters(), lr=lr, betas=(betas[0], betas[1]), weight_decay=decay_rate)
     opt_d = optim.Adam(discriminator.parameters(), lr=lr, betas=(betas[0], betas[1]), weight_decay=decay_rate)
 
+    if schedule:
+        step_g = optim.lr_scheduler.CyclicLR(opt_g, lr, 10*lr, 1, 1, gamma=0.2, cycle_momentum=False)
+        step_d = optim.lr_scheduler.CyclicLR(opt_d, lr, 10 * lr, 1, 1, gamma=0.2, cycle_momentum=False)
+
     # opt_g = get_optimizer(generator, lr, betas[0], betas[1],
     #                     weight_decay=decay_rate)
     # opt_d = get_optimizer(discriminator, lr, betas[0], betas[1],
@@ -61,7 +65,7 @@ def train_loop(train_dl: DataLoader, epochs: int, conditional: bool,
     print(f"Training with noisy_labels = {noisy_labels}...\n")
 
     for epoch in range(epochs):
-        history[f'Epoch {epoch + 1}'] = {'G-Loss': [], 'D-Loss': []}
+        history[f'Epoch {epoch + 1}'] = {'G-Loss': [], 'D-Loss': [], 'lr': []}
 
         for ix, (data, labels) in enumerate(train_dl):
             ### Zero out the accumulated gradients
@@ -131,15 +135,24 @@ def train_loop(train_dl: DataLoader, epochs: int, conditional: bool,
             if not (ix + 1) % 10 or ix + 1 == len(train_dl):
                 print(f'Epoch [{epoch + 1:02d}/{epochs:02d}]')
                 print(f'\tIteration: [{ix + 1:04d}/{len(train_dl)}]')
-                print(f'\tG-Loss: {gen_loss.item():.5f} | D-Loss: {(real_loss + fake_loss).item():.5f}')
-        # step_d.step()
-        # step_g.step()
+                print(f'\tG-Loss: {gen_loss.item():.5f} | D-Loss: {(real_loss + fake_loss).item():.5f}', end='')
+
+                if schedule:
+                    last_lr = step_d.get_last_lr()[-1]
+                else:
+                    last_lr = opt_d.param_groups[-1]['lr']
+
+                print(f' | Learning rate: {last_lr: .5f}')
 
         ### Generate test samples via the generator
         generate_images(
             model=generator, device=device, folder = folder, figsize = figsize,
             num_samples=16, save_images=True, conditional = conditional, epoch=epoch + 1
         )
+
+        if schedule:
+            step_d.step()
+            step_g.step()
 
     return history, discriminator, generator, opt_d, opt_g
 

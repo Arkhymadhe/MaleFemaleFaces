@@ -44,6 +44,8 @@ def main():
 
     args.add_argument('--lr', type=float, default=2e-4, help='Convergence rate')
 
+    args.add_argument('--schedule', '-s', type=bool, default=False, help='Schedule lr?')
+
     args.add_argument('--beta1', type=float, default=0.5, help='First moment')
 
     args.add_argument('--beta2', type=float, default=0.99, help='Second moment')
@@ -131,7 +133,8 @@ def main():
     history, discriminator, generator, opt_d, opt_g = train_loop(
         data, args.epochs, folder=args.image_dir, conditional = args.conditional,
         lr=args.lr, betas=(args.beta1, args.beta2), decay_rate=args.decay_rate,
-        criterion=nn.BCELoss(), device=device, figsize=args.figsize, history=history)
+        criterion=nn.BCELoss(), device=device, schedule=args.schedule,
+        figsize=args.figsize, history=history)
 
     ### Final history of metrics
     visualize_losses(history, epochs=args.epochs)
