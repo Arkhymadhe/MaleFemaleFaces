@@ -1,7 +1,7 @@
 from numpy import ndarray, mean
 import torch
 from torch import Tensor
-from typing import Tuple
+from typing import Tuple, Optional
 import os
 from matplotlib import pyplot as plt
 
@@ -24,6 +24,7 @@ def generate_images(
     folder: str = "DCGAN_images",
     save_images: bool = False,
     conditional: bool = False,
+    labels: Optional[torch.Tensor, int, None] = None
 ):
     """
     Generates images when called.
@@ -41,8 +42,12 @@ def generate_images(
     if not conditional:
         images = model(inputs).detach().cpu().permute(0, 2, 3, 1)
     else:
-        rand_labels = torch.randint(low=0, high=2, size=(num_samples,), device=device)
-        images = model(inputs, rand_labels).detach().cpu().permute(0, 2, 3, 1)
+        if not labels:
+            labels = torch.randint(low=0, high=2, size=(num_samples,), device=device)
+        elif type(labels) == int:
+            labels = torch.full((num_samples,), labels)
+
+        images = model(inputs, labels).detach().cpu().permute(0, 2, 3, 1)
 
     display_images(
         denorm(images).numpy(), nrows, ncolumns, figsize, folder, epoch, save_images
