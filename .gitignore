@@ -1,4 +1,5 @@
 dataset/*
 play.py
+parentheses.py
 /.idea/*
 scripts/__pycache__/*

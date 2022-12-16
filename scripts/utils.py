@@ -8,7 +8,7 @@ from torchinfo import summary
 
 import time
 
-from dcgan import Generator as BaseGenerator, Discriminator as BaseDiscriminator
+from dcgan import BaseGenerator, BaseDiscriminator
 from cgan import Generator, Discriminator
 
 from viz_utils import generate_images
@@ -59,27 +59,30 @@ def train_loop(
     criterion,
     device: torch.device,
     folder: str,
+    noisy: bool,
     kwargs
 ):
     history = dict()
     dl_length = len(train_dl)
-    noisy_labels = bool(np.random.choice([0, 1]))
-    noisy_labels = False
 
     if conditional:
         print(f"Conditional is {conditional}; should be True")
         generator = load_model(device, Generator, **kwargs['g']).apply(initialize_weights)
         discriminator = load_model(device, Discriminator, **kwargs['d']).apply(initialize_weights)
 
-        summary(generator, [[1, 150, 1, 1], [1, 1]], dtypes=[torch.float32, torch.LongTensor])
-        summary(discriminator, [[1, 3, 64, 64], [1, 1]], dtypes=[torch.float32, torch.LongTensor])
+        print(generator.in_channels)
+
+        summary(generator, [[1, generator.in_channels, 1, 1], [1, 1]], dtypes=[torch.float32, torch.int32])
+        summary(discriminator, [[1, discriminator.in_channels, 64, 64], [1, 1]], dtypes=[torch.float32, torch.int32])
     else:
         print(f"Conditional is {conditional}, should be False")
         generator = load_model(device, BaseGenerator, **kwargs['g']).apply(initialize_weights)
         discriminator = load_model(device, BaseDiscriminator, **kwargs['d']).apply(initialize_weights)
 
-        summary(generator, [1, 100, 1, 1], dtypes=[torch.float32])
-        summary(discriminator, [1, 3, 64, 64], dtypes=[torch.float32])
+        print(generator.in_channels)
+
+        summary(generator, [1, generator.in_channels, 1, 1], dtypes=[torch.float32])
+        summary(discriminator, [1, discriminator.in_channels, 64, 64], dtypes=[torch.float32])
 
     opt_g = optim.Adam(
         generator.parameters(),
@@ -96,7 +99,7 @@ def train_loop(
 
     if schedule:
         step_g = optim.lr_scheduler.CyclicLR(
-            opt_g, lr, 10 * lr, 1, 1, gamma=0.2, cycle_momentum=False
+            opt_g, lr, 10 * lr, 1, 1, gamma=0.1, cycle_momentum=False
         )
         step_d = optim.lr_scheduler.CyclicLR(
             opt_d, lr, 10 * lr, 1, 1, gamma=0.2, cycle_momentum=False
@@ -107,7 +110,7 @@ def train_loop(
     # opt_d = get_optimizer(discriminator, lr, betas[0], betas[1],
     #                     weight_decay=decay_rate)
 
-    print(f"Training with noisy_labels = {noisy_labels}...\n")
+    print(f"Training with noisy_labels = {noisy}...\n")
 
     for epoch in range(epochs):
         history[f"Epoch {epoch + 1}"] = {"G-Loss": [], "D-Loss": [], "lr": []}
@@ -117,17 +120,22 @@ def train_loop(
             opt_d.zero_grad()
 
             ### Update the discriminator (real data)
+            real_dis_labels = torch.ones(len(data)).to(device)
+
+            if noisy:
+                real_dis_labels = real_dis_labels * torch.randn(len(real_dis_labels), device=device) + 0.6
+
             if not conditional:
                 real_outputs = discriminator(data.to(device))
                 real_loss = criterion(
-                    real_outputs.squeeze(), torch.ones(len(real_outputs)).to(device)
+                    real_outputs.squeeze(), real_dis_labels
                 )
             else:
 
                 real_outputs, class_outputs = discriminator(data.to(device), labels.to(device))
 
                 _real_loss = criterion(
-                    real_outputs.squeeze(), torch.ones(len(real_outputs)).to(device)
+                    real_outputs.squeeze(), real_dis_labels
                 )
                 _class_loss = criterion(
                     class_outputs.float().squeeze(), labels.to(device, torch.float32)
@@ -138,24 +146,29 @@ def train_loop(
             real_loss.backward()
 
             ### Update the discriminator (fake data)
-            noise = torch.randn(size=(len(data), 100, 1, 1), device=device)
+            noise = torch.randn(size=(len(data), generator.in_channels, 1, 1), device=device)
+
+            fake_dis_labels = torch.zeros(len(data)).to(device)
+
+            if noisy:
+                fake_dis_labels = torch.clamp(fake_dis_labels * torch.randn(len(fake_dis_labels), device=device), 0, 0.3)
 
             if not conditional:
                 fake_imgs = generator(noise).detach()
                 fake_outputs = discriminator(fake_imgs)
 
                 fake_loss = criterion(
-                    fake_outputs.squeeze(), torch.zeros(len(fake_outputs)).to(device)
+                    fake_outputs.squeeze(), fake_dis_labels
                 )
             else:
                 rand_labels = torch.randint(
                     low=0, high=2, size=(len(data),), device=device
                 )
                 fake_imgs = generator(noise, rand_labels).detach()
-                fake_outputs, class_outputs = discriminator(fake_imgs, rand_labels)
+                fake_outputs, class_outputs = discriminator(fake_imgs, fake_dis_labels)
 
                 _fake_loss = criterion(
-                    fake_outputs.squeeze(), torch.zeros(len(fake_outputs)).to(device)
+                    fake_outputs.squeeze(), fake_dis_labels
                 )
                 _class_loss = criterion(
                     class_outputs.float().squeeze(), rand_labels.to(torch.float32)
@@ -170,13 +183,19 @@ def train_loop(
             ### Update the generator
             opt_g.zero_grad()
 
-            noise = torch.randn(size=(len(data), 100, 1, 1), device=device)
+            noise = torch.randn(size=(len(data), generator.in_channels, 1, 1), device=device)
+
+            real_gen_labels = torch.ones(len(data)).to(device)
+
+            if noisy:
+                real_gen_labels = real_gen_labels * torch.randn(len(real_gen_labels), device=device) + 0.6
+
             if not conditional:
                 generated_images = generator(noise)
 
                 dis_pred = discriminator(generated_images)
                 gen_loss = criterion(
-                    dis_pred.squeeze(), torch.ones(len(dis_pred)).to(device)
+                    dis_pred.squeeze(), real_gen_labels
                 )
             else:
                 rand_labels = torch.randint(
@@ -186,7 +205,7 @@ def train_loop(
 
                 dis_pred, class_pred = discriminator(generated_images, rand_labels)
                 _gen_loss = criterion(
-                    dis_pred.squeeze(), torch.ones(len(dis_pred)).to(device)
+                    dis_pred.squeeze(), real_gen_labels
                 )
                 _class_pred = criterion(
                     class_pred.squeeze(), rand_labels.to(torch.float32)

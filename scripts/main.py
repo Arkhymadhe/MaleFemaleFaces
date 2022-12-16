@@ -50,6 +50,8 @@ def main():
 
     args.add_argument("--g_out", type=int, default=3, help="Generator output channels")
 
+    args.add_argument("--latent_dims", type=int, default=15, help="Latent embedding dimension")
+
     args.add_argument(
         "--stats",
         type=tuple,
@@ -62,6 +64,8 @@ def main():
     args.add_argument(
         "--conditional", default=False, type=bool, help="Conditional or not"
     )
+
+    args.add_argument("--noisy", type=bool, default=False, help="Train with noisy labels?")
 
     args.add_argument("--lr", type=float, default=2e-4, help="Convergence rate")
 
@@ -173,7 +177,7 @@ def main():
     kwargs = {
         'g' : {
             'in_channels' : args.g_in,
-            'out_channels' : args.g_out
+            'out_channels' : args.g_out,
         },
         'd' : {
             'in_channels' : args.d_in,
@@ -181,8 +185,11 @@ def main():
         }
     }
 
+    if args.conditional:
+        kwargs['g'].update({'latent_dims' : args.latent_dims})
+
     ### Train GAN
-    print(f">>> Starting training, Conditional = {args.conditional}...\n")
+    print(f">>> Starting training;  Noisy labels = {args.noisy} Conditional = {args.conditional}...\n")
 
     history, discriminator, generator, opt_d, opt_g = train_loop(
         data,
@@ -196,6 +203,7 @@ def main():
         device=device,
         schedule=args.schedule,
         figsize=args.figsize,
+        noisy=args.noisy,
         kwargs=kwargs
     )
 

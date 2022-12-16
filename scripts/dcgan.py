@@ -1,9 +1,9 @@
 from torch import nn
 
 
-class Discriminator(nn.Module):
+class BaseDiscriminator(nn.Module):
     def __init__(self, in_channels: int = 3, out_channels: int = 1):
-        super(Discriminator, self).__init__()
+        super(BaseDiscriminator, self).__init__()
 
         self.in_channels = in_channels
         self.out_channels = out_channels
@@ -28,9 +28,9 @@ class Discriminator(nn.Module):
         return self.model(input)
 
 
-class Generator(nn.Module):
+class BaseGenerator(nn.Module):
     def __init__(self, in_channels: int = 100, out_channels: int = 3):
-        super(Generator, self).__init__()
+        super(BaseGenerator, self).__init__()
 
         self.in_channels = in_channels
         self.out_channels = out_channels

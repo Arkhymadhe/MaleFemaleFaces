@@ -1,6 +1,6 @@
 import torch
 from torch import nn
-from dcgan import Discriminator as BaseDiscriminator, Generator as BaseGenerator
+from dcgan import BaseDiscriminator, BaseGenerator
 
 
 class GeneratorEmbedding(nn.Module):
@@ -30,12 +30,15 @@ class Generator(nn.Module):
     def __init__(self, in_channels: int = 100, out_channels: int = 3, latent_dims: int = 50):
         super(Generator, self).__init__()
         self.latent_dims = latent_dims
-        self.embedder = GeneratorEmbedding()
+        self.embedder = GeneratorEmbedding(self.latent_dims)
         self.base_generator = BaseGenerator(in_channels, out_channels)
+
+        self.in_channels = self.latent_dims + self.base_generator.in_channels
+        self.out_channels = out_channels
 
         self.base = nn.Sequential(
             nn.ConvTranspose2d(
-                self.latent_dims + self.base_generator.in_channels,
+                self.in_channels,
                 100,
                 1,
                 1,
@@ -44,7 +47,7 @@ class Generator(nn.Module):
             ),
             nn.BatchNorm2d(100),
             *self.base_generator.model[:-2],
-            nn.ConvTranspose2d(64, 3, 4, 2, 1, bias=False),
+            nn.ConvTranspose2d(64, self.out_channels, 4, 2, 1, bias=False),
             nn.Tanh(),
         )
 
