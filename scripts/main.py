@@ -3,8 +3,6 @@
 import argparse
 from copy import deepcopy
 
-# from torchinfo import summary
-
 from data_ops import *
 from utils import *
 from viz_utils import *
@@ -62,12 +60,12 @@ def main():
     args.add_argument("--save", default=True, type=bool, help="Save trained model")
 
     args.add_argument(
-        "--conditional", "-c", type=bool, default=True, help="Conditional or not"
+        "--conditional", default=False, type=bool, help="Conditional or not"
     )
 
     args.add_argument("--lr", type=float, default=2e-4, help="Convergence rate")
 
-    args.add_argument("--schedule", "-s", type=bool, default=False, help="Schedule lr?")
+    args.add_argument("--schedule", type=bool, default=False, help="Schedule lr?")
 
     args.add_argument("--beta1", type=float, default=0.5, help="First moment")
 
@@ -126,17 +124,16 @@ def main():
     )
 
     print(
-        f">>> Dataset successfully imported! Time elapsed : {keep_time(start_time):.5f} secs.\n"
+        f">>> Dataset successfully imported! Time elapsed : {keep_time(start_time):.5f} secs.\n\n"
     )
-    print()
 
     ### Randomly obtain a sample batch of images
     b = next(iter(data))[0]
 
     ### Display selected sample
-    display_images(
-        images=denorm(b.permute(0, 2, 3, 1)), nrows=4, ncolumns=4, figsize=args.figsize
-    )
+   # display_images(
+    #    images=denorm(b.permute(0, 2, 3, 1)), nrows=4, ncolumns=4, figsize=args.figsize
+    #)
 
     ### Reproducibility
     print(">>> Ensuring reproducibility...")
@@ -157,12 +154,12 @@ def main():
     start_time = time.time()
 
     device = "cuda" if args.gpu else "cpu"
-    try:
-        device = torch.device(device)
+    if device == "cuda":
         print(f"Cuda device selected!\n")
-    except:
+    else:
         print(f"No Cuda device detected! Switching to CPU...\n")
-        device = torch.device(device)
+
+    device = torch.device(device)
 
     ### Instantiate GAN object
 
@@ -172,7 +169,6 @@ def main():
 
     del b
     gc.collect()
-    history = dict()
 
     kwargs = {
         'g' : {
@@ -186,7 +182,7 @@ def main():
     }
 
     ### Train GAN
-    print(f">>> Starting training, labels = {args.conditional}...\n")
+    print(f">>> Starting training, Conditional = {args.conditional}...\n")
 
     history, discriminator, generator, opt_d, opt_g = train_loop(
         data,

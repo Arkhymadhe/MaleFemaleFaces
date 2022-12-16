@@ -24,7 +24,7 @@ def generate_images(
     folder: str = "DCGAN_images",
     save_images: bool = False,
     conditional: bool = False,
-    labels: Optional[torch.Tensor, int, None] = None
+    labels = None
 ):
     """
     Generates images when called.

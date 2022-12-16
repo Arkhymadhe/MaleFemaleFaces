@@ -1,17 +1,16 @@
-from typing import Optional
-from matplotlib import pyplot as plt
-
 import torch
 import numpy as np
 
 from torch import nn
 from torch import optim
 from torch.utils.data import DataLoader
+from torchinfo import summary
 
 import time
 
-from cgan import Generator, Discriminator
 from dcgan import Generator as BaseGenerator, Discriminator as BaseDiscriminator
+from cgan import Generator, Discriminator
+
 from viz_utils import generate_images
 
 
@@ -68,11 +67,19 @@ def train_loop(
     noisy_labels = False
 
     if conditional:
+        print(f"Conditional is {conditional}; should be True")
         generator = load_model(device, Generator, **kwargs['g']).apply(initialize_weights)
         discriminator = load_model(device, Discriminator, **kwargs['d']).apply(initialize_weights)
+
+        summary(generator, [[1, 150, 1, 1], [1, 1]], dtypes=[torch.float32, torch.LongTensor])
+        summary(discriminator, [[1, 3, 64, 64], [1, 1]], dtypes=[torch.float32, torch.LongTensor])
     else:
+        print(f"Conditional is {conditional}, should be False")
         generator = load_model(device, BaseGenerator, **kwargs['g']).apply(initialize_weights)
         discriminator = load_model(device, BaseDiscriminator, **kwargs['d']).apply(initialize_weights)
+
+        summary(generator, [1, 100, 1, 1], dtypes=[torch.float32])
+        summary(discriminator, [1, 3, 64, 64], dtypes=[torch.float32])
 
     opt_g = optim.Adam(
         generator.parameters(),
@@ -136,6 +143,7 @@ def train_loop(
             if not conditional:
                 fake_imgs = generator(noise).detach()
                 fake_outputs = discriminator(fake_imgs)
+
                 fake_loss = criterion(
                     fake_outputs.squeeze(), torch.zeros(len(fake_outputs)).to(device)
                 )
