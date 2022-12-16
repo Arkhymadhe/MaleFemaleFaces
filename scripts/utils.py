@@ -11,6 +11,7 @@ from torch.utils.data import DataLoader
 import time
 
 from cgan import Generator, Discriminator
+from dcgan import Generator as BaseGenerator, Discriminator as BaseDiscriminator
 from viz_utils import generate_images
 
 
@@ -66,8 +67,12 @@ def train_loop(
     noisy_labels = bool(np.random.choice([0, 1]))
     noisy_labels = False
 
-    generator = load_model(device, Generator, **kwargs['g']).apply(initialize_weights)
-    discriminator = load_model(device, Discriminator, **kwargs['d']).apply(initialize_weights)
+    if conditional:
+        generator = load_model(device, Generator, **kwargs['g']).apply(initialize_weights)
+        discriminator = load_model(device, Discriminator, **kwargs['d']).apply(initialize_weights)
+    else:
+        generator = load_model(device, BaseGenerator, **kwargs['g']).apply(initialize_weights)
+        discriminator = load_model(device, BaseDiscriminator, **kwargs['d']).apply(initialize_weights)
 
     opt_g = optim.Adam(
         generator.parameters(),
