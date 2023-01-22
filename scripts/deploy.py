@@ -19,6 +19,20 @@ def load_model(PATH):
     return loaded_model
 
 
+@app.route("/generate/")
+def display_generated_images(images):
+    num_samples = images.shape[0]
+    if num_samples > 10:
+        raise Exception("Number of samples must be even [1, 10]")
+    if num_samples % 2:
+        nrows, ncols = 2, (num_samples + 1)//2
+    else:
+        nrows, ncols = 2, num_samples // 2
+
+    display_images(images, nrows, ncols, save_images=False)
+    return
+
+
 def generate_seed(cond = 0, label = None, num_samples=1, latent_dims=(100,1,1)):
     seed = torch.randn(size=[num_samples, *latent_dims])
 
