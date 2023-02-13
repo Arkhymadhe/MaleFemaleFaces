@@ -3,3 +3,4 @@ play.py
 parentheses.py
 /.idea/*
 scripts/__pycache__/*
+.idea
